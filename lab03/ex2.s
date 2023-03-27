@@ -33,35 +33,35 @@ main:
     addi sp, sp, -20
     sw s0, 0(sp)
     sw s1, 4(sp)
-    sw s2, 8(sp)
+    sw s2, 8(sp)              #Stored values of Saved Registers Callee for backup
     sw s3, 12(sp)
     sw ra, 16(sp)
     # END PROLOGUE
-    addi t0, x0, 0
-    addi s0, x0, 0
+    addi t0, x0, 0       #t0 register as k=0
+    addi s0, x0, 0       #s0 as Sum
     la s1, source
     la s2, dest
 loop:
     slli s3, t0, 2
     add t1, s1, s3
-    lw t2, 0(t1)
+    lw t2, 0(t1)    #load @ source array
     beq t2, x0, exit
-    add a0, x0, t2
+    add a0, x0, t2       #argument pass to function
     addi sp, sp, -8
     sw t0, 0(sp)
     sw t2, 4(sp)
-    jal fun
+    jal fun           #
     lw t0, 0(sp)
     lw t2, 4(sp)
     addi sp, sp, 8
-    add t2, x0, a0
+    add t2, x0, a0      #return value from fun
     add t3, s2, s3
-    sw t2, 0(t3)
+    sw t2, 0(t3)      #store @ destination array
     add s0, s0, t2
     addi t0, t0, 1
     jal x0, loop
 exit:
-    add a0, x0, s0
+    add a0, x0, s0              #s0 as Sum
     # BEGIN EPILOGUE
     lw s0, 0(sp)
     lw s1, 4(sp)
