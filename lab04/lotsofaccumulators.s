@@ -65,8 +65,8 @@ TailCasethree:
 	mv a0 x0
 	j Epiloguethree
 Epiloguethree:	
+lw ra 4(sp)
 	lw s0 0(sp)
-	lw ra 4(sp)
 	addi sp sp 8
 	jr ra
 
