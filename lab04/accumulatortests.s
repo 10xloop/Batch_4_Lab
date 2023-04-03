@@ -17,10 +17,11 @@ TestFailed: .asciiz "Test Failed!"
 main:
     la a0 inputarray
 li t2,0
-    jal accumulatorfour
+    jal accumulatorthree
   
-    li t0 9
-    beq t2 zero Pass
+    li t0 0
+    beq a0 t0 Pass
+
 Fail:
     la a0 TestFailed
     jal print_string
