@@ -52,7 +52,7 @@ map:
     sw s0, 8(sp)
 
     beq a0, x0, done    # if we were given a null pointer, we're done.
-
+    la  a1, mystery 
     add s0, a0, x0      # save address of this node in s0
     add s1, a1, x0      # save address of function in s1
     add t0, x0, x0      # t0 is a counter
@@ -66,28 +66,39 @@ map:
     # are modified by the callees, even when we know the content inside the functions 
     # we call. this is to enforce the abstraction barrier of calling convention.
 mapLoop:
-    add t1, s0, x0      # load the address of the array of current node into t1
-    lw t2, 4(s0)        # load the size of the node's array into t2
-
-    add t1, t1, t0      # offset the array address by the count
+    #add t1, s0, x0      # load the address of the head of current node into t1
+    lw t1,0(s0)   #ooooooooooooooooooooooooooooooooo
+    slli t3,t0,2       #ooooooooooooooooooooooooooooooooo
+    add t1,t3,t1     #ooooooooooooooooooooooooooooooooo
+    #lw t2, 4(s0)        # load the size of the node's array into t2
+     li t2,5
+    #add t1, t1, t0      # offset the array address by the count
     lw a0, 0(t1)        # load the value at that address into a0
 
     jalr s1             # call the function on that value.
 
     sw a0, 0(t1)        # store the returned value back into the array
+   # mv a1, a0  # a0 gets value in current node's array at index t1
+    #li a0, 1  # preparte for print integer ecall
+    #ecall
     addi t0, t0, 1      # increment the count
     bne t0, t2, mapLoop # repeat if we haven't reached the array size yet
 
-    la a0, 8(s0)        # load the address of the next node into a0
+    lw a0, 8(s0)        # load the address of the next node into a0
     lw a1, 0(s1)        # put the address of the function back into a1 to prepare for the recursion
-
-    jal  map            # recurse
+    
+   lw ra, 0(sp)
+    lw s1, 4(sp)
+    lw s0, 8(sp)
+  addi sp, sp, 12   #oooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+    jal x0  map            # recurse
 done:
     lw s0, 8(sp)
     lw s1, 4(sp)
     lw ra, 0(sp)
     addi sp, sp, 12
-
+   jr ra       #ooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+   
 print_newline:
     li a1, '\n'
     li a0, 11
@@ -95,8 +106,12 @@ print_newline:
     jr ra
 
 mystery:
+    addi sp,sp,-4
+    sw t1,0(sp)
     mul t1, a0, a0
     add a0, t1, a0
+      lw t1,0(sp)
+      addi sp,sp,4
     jr ra
 
 create_default_list:
@@ -110,20 +125,20 @@ create_default_list:
     li s0, 0  # pointer to the last node we handled
     li s1, 0  # number of nodes handled
     li s2, 5  # size
-    la s3, arrays
+    la s3, arrays  #load array values to print
 loop: #do...
     li a0, 12
     jal malloc      # get memory for the next node
-    mv s4, a0
-    li a0, 20
+    mv s4, a0        
+    li a0, 20       #5-values in array
     jal  malloc     # get memory for this array
 
     sw a0, 0(s4)    # node->arr = malloc
     lw a0, 0(s4)
-    mv a1, s3
+    mv a1, s3     #copied array address into a1
     jal fillArray   # copy ints over to node->arr
 
-    sw s2, 4(s4)    # node->size = size (4)
+    sw s2, 4(s4)    # node->size = size (5)
     sw  s0, 8(s4)   # node-> next = previously created node
 
     add s0, x0, s4  # last = node
@@ -131,7 +146,7 @@ loop: #do...
     addi s3, s3, 20 # s3 points at next set of ints
     li t6 5
     bne s1, t6, loop # ... while i!= 5
-    mv a0, s4
+    mv a0, s4                              #Head address in s4 moved to a0
     lw ra, 0(sp)
     lw s0, 4(sp)
     lw s1, 8(sp)
